@@ -12,14 +12,22 @@ const App = () => {
   const [state, setState] = useState({
     coordinates: [13.17080317085379, -59.6034520733074],
     zoom: 11,
-    selectedCoordinates: null,
     title: "",
     map: null,
-    markers: []
   })
 
+  const [selectedCoordinates, setSelectedCoordinates] = useState([])
+  const [markers, setMarkers] = useState([])
+
+  // load markers from local storage
+  if (markers.length < 1) {
+    const loadedMarkers = JSON.parse(localStorage.getItem("markers"));
+    if (loadedMarkers)
+      loadedMarkers.map(marker => markers[markers.length] = marker);
+  }
+
   useEffect(() => {
-    if (!state.map)
+    if (!state.map) {
       state.map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/streets-v11',
@@ -27,33 +35,40 @@ const App = () => {
         zoom: state.zoom
       });
 
-    state.map.on('click', (e) => {
-      const { lngLat } = e;
+      state.map.on('click', (e) => {
+        const { lngLat } = e;
 
-      setState({...state, "selectedCoordinates": [lngLat.lng, lngLat.lat] });
-      document.getElementById("confirm").style.display = "block";
-    })
+        setSelectedCoordinates([lngLat.lng, lngLat.lat]);
+        document.getElementById("confirm").style.display = "block";
+      })
 
-    state.map.on('load', () => {
-      console.log('map has loaded')
+      state.map.on('load', () => {
+        console.log('map has loaded')
+    
+        state.map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-      state.map.addControl(new mapboxgl.NavigationControl(), 'top-left');
-    })
-
-  }, [])
-
-  useEffect(() => {
-    // Save to localstorage whenever markers is updated
-    console.log('save markers to localstorage')
-    window.localStorage.setItem('markers', JSON.stringify(state.markers))
-  }, [state.markers])
+        // add existing markers to map
+        if (markers)
+          markers.map(marker => {
+            new mapboxgl.Marker({
+              color: "red"
+            }).setLngLat([marker.lng, marker.lat])
+              .addTo(state.map); 
+          });
+      })
+    }
+  }, [state])
 
   // Update the state object whenever the field is changed
   const handleFieldChange = (e) => {
     const { value, name } = e.target
     
-    setState({...state, [name] : value});
-}
+    setState({...state, [name] : value });
+  }
+
+  const handleRemove = (title) => {
+    // TODO: Remove marker from list and map
+  }
 
   const addMarker = () => {
     //TODO: Add a marker when user clicks on map and display in the left side
@@ -63,13 +78,17 @@ const App = () => {
     if (state.title.length > 0) {
       // create a new marker obj with provided coords and title
       const newMarker = {
-        lng: state.selectedCoordinates[0],
-        lat: state.selectedCoordinates[1],
+        lng: selectedCoordinates[0],
+        lat: selectedCoordinates[1],
         title: state.title
       }
 
       // add marker obj to list
-      state.markers = [...state.markers, newMarker]
+      markers[markers.length] = newMarker
+      console.log(markers)
+
+      console.log('save markers to localstorage')
+      window.localStorage.setItem('markers', JSON.stringify(markers))
 
       // add marker to map
       new mapboxgl.Marker({
@@ -90,8 +109,13 @@ const App = () => {
       </header>
       <div style={{ display: 'flex', width: '100%' }}>
         <div style={{ width: '25%' }}>
-          Marker List
-          {/* Add list of todos here */}
+          <h3>Marker List</h3>
+          {markers?.length > 0 ? markers.map((marker) => (
+            <div name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>{marker.title}</span>
+              <button onClick={() => handleRemove(marker.title)}>Remove</button>
+            </div>
+          )) : ""}
         </div>
         <div style={{ width: '100%' }}>
           <div id="confirm" style={{ display: "none" }}>
