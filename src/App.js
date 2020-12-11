@@ -42,13 +42,7 @@ const App = () => {
         selectedCoordinates[0] = lngLat.lng;
         selectedCoordinates[1] = lngLat.lat;
         
-        if (!isMarker())
-          document.getElementById("confirm").style.display = "block";
-        else {
-          state.map.jumpTo({ 'center': lngLat, 'zoom': 14 }); 
-          state.zoom = 14;
-          state.center = lngLat;
-        }
+        document.getElementById("confirm").style.display = "block";
       })
 
       state.map.on('load', () => {
@@ -88,33 +82,14 @@ const App = () => {
     window.localStorage.setItem('markers', JSON.stringify(markers.filter((marker) => marker.title !== title)))
   }
 
-  const isMarker = () => {
-    // probably not the most efficient algorithm below
-
-    // create a bonding box for a marker ... probably needed some scale for when zoom is at a diff lvl
-    let outerBoundLng = selectedCoordinates[0] + (selectedCoordinates[0] < 0 ? 0.01 : -0.01)
-    let innerBoundLng = selectedCoordinates[0] + (selectedCoordinates[0] < 0 ? -0.01 : +0.01)
-
-    if (outerBoundLng > innerBoundLng) { // swap...we want the outer to less then the inner
-      let temp = outerBoundLng
-      outerBoundLng = innerBoundLng;
-      innerBoundLng = temp
-    }
-
-    let outerBoundLat = selectedCoordinates[1] + (selectedCoordinates[1] < 0 ? 0.01 : -0.01)
-    let innerBoundLat = selectedCoordinates[1] + (selectedCoordinates[1] < 0 ? -0.01 : +0.01)
-    if (outerBoundLat > innerBoundLat) { // swap...we want the outer to less then the inner
-      let temp = outerBoundLat
-      outerBoundLat = innerBoundLat;
-      innerBoundLat = temp
-    }
-
-    for(let i = 0; i < markers.length; i++)
-      if (markers[i].lng >= outerBoundLng && markers[i].lng <= innerBoundLng)
-        if (markers[i].lat >= outerBoundLat && markers[i].lat <= innerBoundLat)
-          return true;
-
-    return false; // no marker seem to match (in range) current select coordss
+  const viewMarker = (title) => {
+    const marker = markers.filter((marker) => marker.title === title)[0];
+    const lngLat = {
+      lng: marker.lng,
+      lat: marker.lat
+    };
+    state.map.jumpTo({ 'center': lngLat, 'zoom': 14 }); 
+    state.zoom = 14;
   }
 
   const addMarker = () => {
@@ -161,7 +136,7 @@ const App = () => {
         <div style={{ width: '25%' }}>
           <h3>Marker List</h3>
           {markers?.length > 0 ? markers.map((marker) => (
-            <div name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div onClick={() => viewMarker(marker.title)} name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>{marker.title}</span>
               <button onClick={() => handleRemove(marker.title)}>Remove</button>
             </div>
