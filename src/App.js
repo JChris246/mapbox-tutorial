@@ -41,8 +41,18 @@ const App = () => {
 
         selectedCoordinates[0] = lngLat.lng;
         selectedCoordinates[1] = lngLat.lat;
+        let popup = new mapboxgl.Popup({ offset: [0, -15] })
+          .setLngLat(lngLat)
+          .setHTML(
+            <div id="confirm">
+              <span>Please enter a title for the marker: </span>
+              <input type="text" placeholder="title" name="title" onChange={handleFieldChange} value={state.title}/>
+              <button onClick={addMarker}>Enter</button>
+            </div>
+          )
+          .addTo(state.map)
         
-        document.getElementById("confirm").style.display = "block";
+        // document.getElementById("confirm").style.display = "block";
       })
 
       state.map.on('load', () => {
@@ -127,7 +137,7 @@ const App = () => {
 
       // close popup
       setState({...state, "title" : ""});
-      document.getElementById("confirm").style.display = "none";
+      // document.getElementById("confirm").style.display = "none";
     }
   }
 
@@ -146,21 +156,8 @@ const App = () => {
             </div>
           )) : ""}
         </div>
-        <div style={{ width: '100%' }}>
-          <div id="confirm" style={{ display: "none" }}>
-            <span>Please enter a title for the marker: </span>
-            <input
-              type="text"
-              placeholder="title"
-              name="title"
-              onChange={handleFieldChange}
-              value={state.title}
-            />
-            <button onClick={addMarker}>Enter</button>
-          </div>
-          <div id='map' style={{ height: '500px'}}>
+        <div id='map' style={{ height: '500px',  width: '100%'}}>
 
-          </div>
         </div>
       </div>
 
