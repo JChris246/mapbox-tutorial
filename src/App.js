@@ -38,8 +38,16 @@ const App = () => {
       state.map.on('click', (e) => {
         const { lngLat } = e;
 
-        setSelectedCoordinates([lngLat.lng, lngLat.lat]);
-        document.getElementById("confirm").style.display = "block";
+        selectedCoordinates[0] = lngLat.lng;
+        selectedCoordinates[1] = lngLat.lat;
+        
+        if (!isMarker())
+          document.getElementById("confirm").style.display = "block";
+        else {
+          state.map.jumpTo({ 'center': lngLat, 'zoom': 14 }); 
+          state.zoom = 14;
+          state.center = lngLat;
+        }
       })
 
       state.map.on('load', () => {
@@ -70,6 +78,35 @@ const App = () => {
     // TODO: Remove marker from list and map
   }
 
+  const isMarker = () => {
+    // probably not the most efficient algorithm below
+
+    // create a bonding box for a marker ... probably needed some scale for when zoom is at a diff lvl
+    let outerBoundLng = selectedCoordinates[0] + (selectedCoordinates[0] < 0 ? 0.01 : -0.01)
+    let innerBoundLng = selectedCoordinates[0] + (selectedCoordinates[0] < 0 ? -0.01 : +0.01)
+
+    if (outerBoundLng > innerBoundLng) { // swap...we want the outer to less then the inner
+      let temp = outerBoundLng
+      outerBoundLng = innerBoundLng;
+      innerBoundLng = temp
+    }
+
+    let outerBoundLat = selectedCoordinates[1] + (selectedCoordinates[1] < 0 ? 0.01 : -0.01)
+    let innerBoundLat = selectedCoordinates[1] + (selectedCoordinates[1] < 0 ? -0.01 : +0.01)
+    if (outerBoundLat > innerBoundLat) { // swap...we want the outer to less then the inner
+      let temp = outerBoundLat
+      outerBoundLat = innerBoundLat;
+      innerBoundLat = temp
+    }
+
+    for(let i = 0; i < markers.length; i++)
+      if (markers[i].lng >= outerBoundLng && markers[i].lng <= innerBoundLng)
+        if (markers[i].lat >= outerBoundLat && markers[i].lat <= innerBoundLat)
+          return true;
+
+    return false; // no marker seem to match (in range) current select coordss
+  }
+
   const addMarker = () => {
     //TODO: Add a marker when user clicks on map and display in the left side
     //NOTE: Each marker must have distinct coordinates within Barbados
@@ -85,7 +122,6 @@ const App = () => {
 
       // add marker obj to list
       markers[markers.length] = newMarker
-      console.log(markers)
 
       console.log('save markers to localstorage')
       window.localStorage.setItem('markers', JSON.stringify(markers))
