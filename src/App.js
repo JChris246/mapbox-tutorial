@@ -18,6 +18,7 @@ const App = () => {
 
   const [selectedCoordinates, setSelectedCoordinates] = useState([])
   const [markers, setMarkers] = useState([])
+  const [realMarkers, setRealMarkers] = useState([])
 
   // load markers from local storage
   if (markers.length < 1) {
@@ -58,10 +59,12 @@ const App = () => {
         // add existing markers to map
         if (markers)
           markers.map(marker => {
-            new mapboxgl.Marker({
+            let m = new mapboxgl.Marker({
               color: "red"
             }).setLngLat([marker.lng, marker.lat])
-              .addTo(state.map); 
+              .addTo(state.map);
+            
+              realMarkers[realMarkers.length] = {"marker": m, "id": marker.title};
           });
       })
     }
@@ -76,6 +79,13 @@ const App = () => {
 
   const handleRemove = (title) => {
     // TODO: Remove marker from list and map
+    setMarkers(markers.filter((marker) => marker.title !== title))
+
+    realMarkers.filter((marker) => marker.id === title)[0].marker.remove()
+    setRealMarkers(realMarkers.filter((marker) => marker.id !== title))
+    
+    console.log('save markers to localstorage')
+    window.localStorage.setItem('markers', JSON.stringify(markers.filter((marker) => marker.title !== title)))
   }
 
   const isMarker = () => {
@@ -127,10 +137,14 @@ const App = () => {
       window.localStorage.setItem('markers', JSON.stringify(markers))
 
       // add marker to map
-      new mapboxgl.Marker({
+      let m = new mapboxgl.Marker({
         color: "red",
       }).setLngLat([newMarker.lng, newMarker.lat])
         .addTo(state.map);
+      realMarkers[realMarkers.length] = {
+        "marker": m,
+        "id": state.title
+      };
 
       // close popup
       setState({...state, "title" : ""});
