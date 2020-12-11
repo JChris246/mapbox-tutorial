@@ -98,6 +98,10 @@ const App = () => {
     //NOTE: Utilize localstorage. No auth required.
 
     if (state.title.length > 0) {
+
+      if (markers.filter((marker) => state.title === marker.title).length > 0)
+        return; // a marker with this name exists already
+
       // create a new marker obj with provided coords and title
       const newMarker = {
         lng: selectedCoordinates[0],
