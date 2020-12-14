@@ -164,7 +164,7 @@ const App = () => {
         <div style={{ width: '25%' }}>
           <h3>Marker List</h3>
           {markers?.length > 0 ? markers.map(marker => (
-            <div name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div key={index} name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span onClick={() => viewMarker(marker.title)}>{marker.title}</span>
               <button onClick={() => handleRemove(marker.title)}>Remove</button>
             </div>
