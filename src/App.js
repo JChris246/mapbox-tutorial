@@ -56,15 +56,21 @@ const App = () => {
         form = createElementFromHTML(form)
 
         let popup;
+        let m;
         form.children[1].addEventListener("change", handleFieldChange);
-        form.children[2].addEventListener("click", () => addMarker(popup));
+        form.children[2].addEventListener("click", () => addMarker(popup, m));
 
         popup = new mapboxgl.Popup({ offset: [0, -15] })
           .setLngLat(lngLat)
           .setDOMContent(form)
-          .addTo(state.map)
-        
-        // document.getElementById("confirm").style.display = "block";
+
+        // add marker to map
+        m = new mapboxgl.Marker({
+          color: "red",
+        }).setLngLat([selectedCoordinates[0], selectedCoordinates[1]])
+          .setPopup(popup)
+          .addTo(state.map);
+        m.togglePopup() // open popup ... seems to be closed by default
       })
 
       state.map.on('load', () => {
@@ -115,7 +121,7 @@ const App = () => {
     state.zoom = 14;
   }
 
-  const addMarker = (popup) => {
+  const addMarker = (popup, m) => {
     //TODO: Add a marker when user clicks on map and display in the left side
     //NOTE: Each marker must have distinct coordinates within Barbados
     //NOTE: Utilize localstorage. No auth required.
@@ -138,11 +144,6 @@ const App = () => {
       console.log('save markers to localstorage')
       window.localStorage.setItem('markers', JSON.stringify(markers))
 
-      // add marker to map
-      let m = new mapboxgl.Marker({
-        color: "red",
-      }).setLngLat([newMarker.lng, newMarker.lat])
-        .addTo(state.map);
       realMarkers[realMarkers.length] = {
         "marker": m,
         "id": state.title
@@ -151,7 +152,6 @@ const App = () => {
       // close popup
       setState({...state, "title" : ""});
       popup.remove();
-      // document.getElementById("confirm").style.display = "none";
     }
   }
 
@@ -163,7 +163,7 @@ const App = () => {
       <div style={{ display: 'flex', width: '100%' }}>
         <div style={{ width: '25%' }}>
           <h3>Marker List</h3>
-          {markers?.length > 0 ? markers.map(marker => (
+          {markers?.length > 0 ? markers.map((marker, index) => (
             <div key={index} name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span onClick={() => viewMarker(marker.title)}>{marker.title}</span>
               <button onClick={() => handleRemove(marker.title)}>Remove</button>
