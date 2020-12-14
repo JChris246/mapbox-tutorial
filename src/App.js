@@ -41,15 +41,20 @@ const App = () => {
 
         selectedCoordinates[0] = lngLat.lng;
         selectedCoordinates[1] = lngLat.lat;
+
+        const form = (
+          <div id="confirm">
+            <span>Please enter a title for the marker: </span>
+            <input type="text" placeholder="title" name="title" onChange={handleFieldChange} value={state.title}/>
+            <button onClick={addMarker}>Enter</button>
+          </div>
+        );
+        let div = document.createElement('div');
+        ReactDOM.render(form, div);
+        
         let popup = new mapboxgl.Popup({ offset: [0, -15] })
           .setLngLat(lngLat)
-          .setHTML(
-            <div id="confirm">
-              <span>Please enter a title for the marker: </span>
-              <input type="text" placeholder="title" name="title" onChange={handleFieldChange} value={state.title}/>
-              <button onClick={addMarker}>Enter</button>
-            </div>
-          )
+          .setDOMContent(div)
           .addTo(state.map)
         
         // document.getElementById("confirm").style.display = "block";
