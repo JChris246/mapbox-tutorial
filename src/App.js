@@ -42,19 +42,26 @@ const App = () => {
         selectedCoordinates[0] = lngLat.lng;
         selectedCoordinates[1] = lngLat.lat;
 
-        const form = (
-          <div id="confirm">
-            <span>Please enter a title for the marker: </span>
-            <input type="text" placeholder="title" name="title" onChange={handleFieldChange} value={state.title}/>
-            <button onClick={addMarker}>Enter</button>
-          </div>
-        );
-        let div = document.createElement('div');
-        ReactDOM.render(form, div);
-        
-        let popup = new mapboxgl.Popup({ offset: [0, -15] })
+        const createElementFromHTML = (htmlString) => {
+          let div = document.createElement('div');
+          div.innerHTML = htmlString.trim();
+
+          return div.firstChild; 
+        }
+
+        let form = '<div id="confirm"><span>Please enter a title for the marker: </span>'
+        form += '<input type="text" placeholder="title" name="title" value="' + state.title + '"/>';
+        form += '<button>Enter</button></div>';
+
+        form = createElementFromHTML(form)
+
+        let popup;
+        form.children[1].addEventListener("change", handleFieldChange);
+        form.children[2].addEventListener("click", () => addMarker(popup));
+
+        popup = new mapboxgl.Popup({ offset: [0, -15] })
           .setLngLat(lngLat)
-          .setDOMContent(div)
+          .setDOMContent(form)
           .addTo(state.map)
         
         // document.getElementById("confirm").style.display = "block";
@@ -83,7 +90,8 @@ const App = () => {
   const handleFieldChange = (e) => {
     const { value, name } = e.target
     
-    setState({...state, [name] : value });
+    // setState({...state, [name] : value });
+    state.title = value;
   }
 
   const handleRemove = (title) => {
@@ -107,7 +115,7 @@ const App = () => {
     state.zoom = 14;
   }
 
-  const addMarker = () => {
+  const addMarker = (popup) => {
     //TODO: Add a marker when user clicks on map and display in the left side
     //NOTE: Each marker must have distinct coordinates within Barbados
     //NOTE: Utilize localstorage. No auth required.
@@ -142,6 +150,7 @@ const App = () => {
 
       // close popup
       setState({...state, "title" : ""});
+      popup.remove();
       // document.getElementById("confirm").style.display = "none";
     }
   }
@@ -154,9 +163,9 @@ const App = () => {
       <div style={{ display: 'flex', width: '100%' }}>
         <div style={{ width: '25%' }}>
           <h3>Marker List</h3>
-          {markers?.length > 0 ? markers.forEach((marker) => (
-            <div onClick={() => viewMarker(marker.title)} name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>{marker.title}</span>
+          {markers?.length > 0 ? markers.map(marker => (
+            <div name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span onClick={() => viewMarker(marker.title)}>{marker.title}</span>
               <button onClick={() => handleRemove(marker.title)}>Remove</button>
             </div>
           )) : ""}
