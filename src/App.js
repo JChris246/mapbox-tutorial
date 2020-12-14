@@ -24,7 +24,7 @@ const App = () => {
   if (markers.length < 1) {
     const loadedMarkers = JSON.parse(localStorage.getItem("markers"));
     if (loadedMarkers)
-      loadedMarkers.map(marker => markers[markers.length] = marker);
+      loadedMarkers.forEach(marker => markers[markers.length] = marker);
   }
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const App = () => {
 
         // add existing markers to map
         if (markers)
-          markers.map(marker => {
+          markers.forEach(marker => {
             let m = new mapboxgl.Marker({
               color: "red"
             }).setLngLat([marker.lng, marker.lat])
@@ -154,7 +154,7 @@ const App = () => {
       <div style={{ display: 'flex', width: '100%' }}>
         <div style={{ width: '25%' }}>
           <h3>Marker List</h3>
-          {markers?.length > 0 ? markers.map((marker) => (
+          {markers?.length > 0 ? markers.forEach((marker) => (
             <div onClick={() => viewMarker(marker.title)} name={marker.title} style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>{marker.title}</span>
               <button onClick={() => handleRemove(marker.title)}>Remove</button>
