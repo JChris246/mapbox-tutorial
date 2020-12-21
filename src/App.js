@@ -20,24 +20,23 @@ const App = () => {
       container: 'map',
       style: 'mapbox://styles/mapbox/streets-v11',
       center: [state.coordinates[1], state.coordinates[0]],
-      zoom: state.zoom
+      zoom: state.zoom,
     });
-    console.log(map)
-    // map.on('click', (e) => {
-    //   console.log(e)
-    // })
+    map.on('click', (e) => {
+      console.log(e)
+    })
 
-    // map.on('load', () => {
-    //   console.log('map has loaded')
+    map.on('load', () => {
+      console.log('map has loaded')
 
-    //   map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+      map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-    //   new mapboxgl.Marker({
-    //     color: "red",
-    //     // draggable: true
-    //   }).setLngLat([state.coordinates[1], state.coordinates[0]])
-    //     .addTo(map);
-    // })
+      new mapboxgl.Marker({
+        color: "red",
+        // draggable: true
+      }).setLngLat([state.coordinates[1], state.coordinates[0]])
+        .addTo(map);
+    })
 
     //eslint-disable-next-line
   }, [])
@@ -58,7 +57,7 @@ const App = () => {
           Marker List
           {/* Add list of todos here */}
         </div>
-        <div id='map' style={{ height: '500px', width: '100%' }}>
+        <div data-testid="map" id='map' style={{ height: '500px', width: '100%' }}>
 
         </div>
       </div>
